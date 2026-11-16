@@ -21,21 +21,64 @@ jobs:
         shell: powershell
         run: |
           npm install -g @tauri-apps/cli@^1.5.0
-          mkdir dist
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
           Copy-Item index.html dist/index.html
           tauri init --app-name DeltaTimer --window-title DeltaTimer --dist-dir ../dist --dev-path ../dist --ci
-          
-          # 修改配置为透明、无边框、置顶
-          $conf = Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json
-          $conf.build.withGlobalTauri = $true
-          $conf.tauri.allowlist.window = @{ all = $true; startDragging = $true; close = $true }
-          $conf.tauri.windows[0].width = 365
-          $conf.tauri.windows[0].height = 290
-          $conf.tauri.windows[0].decorations = $false
-          $conf.tauri.windows[0].transparent = $true
-          $conf.tauri.windows[0].alwaysOnTop = $true
-          $conf.tauri.bundle.identifier = "com.deltatimer.hud"
-          $conf | ConvertTo-Json -Depth 10 | Set-Content src-tauri/tauri.conf.json
+
+          $json = @'
+          {
+            "build": {
+              "beforeBuildCommand": "",
+              "beforeDevCommand": "",
+              "devPath": "../dist",
+              "distDir": "../dist",
+              "withGlobalTauri": true
+            },
+            "package": {
+              "productName": "DeltaTimer",
+              "version": "1.0.0"
+            },
+            "tauri": {
+              "allowlist": {
+                "all": false,
+                "window": {
+                  "all": true,
+                  "close": true,
+                  "startDragging": true,
+                  "setAlwaysOnTop": true,
+                  "setIgnoreCursorEvents": true
+                }
+              },
+              "bundle": {
+                "active": true,
+                "targets": ["msi", "nsis"],
+                "identifier": "com.deltatimer.hud",
+                "icon": [
+                  "icons/32x32.png",
+                  "icons/128x128.png",
+                  "icons/icon.ico"
+                ]
+              },
+              "security": {
+                "csp": null
+              },
+              "windows": [
+                {
+                  "title": "DeltaTimer",
+                  "width": 365,
+                  "height": 290,
+                  "resizable": false,
+                  "decorations": false,
+                  "transparent": true,
+                  "alwaysOnTop": true,
+                  "x": 20,
+                  "y": 20
+                }
+              ]
+            }
+          }
+          '@
+          $json | Set-Content -Path "src-tauri/tauri.conf.json" -Encoding UTF8
 
       - name: Build EXE
         run: tauri build
