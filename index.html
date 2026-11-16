@@ -17,52 +17,40 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: rgba(0, 0, 0, 0) !important;
+      background: #0e131a;
+      color: #fff;
       font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
     }
 
-    /* 主悬浮胶囊：留一点外边距防止透明边缘裁切 */
     #capsule {
-      width: 345px;
-      margin: 4px;
-      background: rgba(14, 19, 26, 0.92);
-      border: 1.5px solid rgba(0, 255, 157, 0.45);
-      border-radius: 10px;
-      padding: 6px 12px 10px 12px;
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+      width: 100%;
+      height: 100%;
+      background: #0e131a;
+      border: 1.5px solid rgba(0, 255, 157, 0.5);
+      padding: 6px 12px;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* 幽灵纯字模式 (F8) */
-    body.ghost-mode #capsule {
-      background: rgba(0, 0, 0, 0.01) !important;
-      border-color: transparent !important;
-      box-shadow: none !important;
-    }
-    body.ghost-mode .hide-on-ghost,
-    body.ghost-mode #drawer {
-      display: none !important;
-    }
-
-    /* 顶部专用拖拽与控制条（彻底把拖拽区和按钮区分开，解决点不到按钮的问题） */
+    /* 顶部栏 */
     .top-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding-bottom: 4px;
       margin-bottom: 4px;
-      padding-bottom: 3px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .drag-handle {
       flex: 1;
-      font-size: 11px;
+      font-size: 12px;
       color: #94a3b8;
       cursor: move;
-      padding: 2px 0;
       display: flex;
       align-items: center;
       gap: 6px;
+      padding: 2px 0;
     }
     .drag-handle:hover {
       color: #00ff9d;
@@ -84,12 +72,12 @@
     .status-group {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
 
     .icon-btn {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: #1e293b;
+      border: 1px solid #475569;
       color: #e2e8f0;
       font-size: 12px;
       font-weight: bold;
@@ -98,11 +86,14 @@
       cursor: pointer;
     }
     .icon-btn:hover {
-      background: rgba(0, 255, 157, 0.25);
-      color: #fff;
+      background: #00ff9d;
+      color: #000;
+      border-color: #00ff9d;
     }
     .icon-btn.close:hover {
-      background: rgba(239, 68, 68, 0.85);
+      background: #ef4444;
+      color: #fff;
+      border-color: #ef4444;
     }
 
     /* 第一行：北京时间大字 */
@@ -117,7 +108,6 @@
       font-size: 32px;
       font-weight: 900;
       color: #ffffff;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95);
       line-height: 1.05;
     }
 
@@ -140,19 +130,12 @@
       font-size: 28px;
       font-weight: 900;
       color: #38bdf8;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95);
       line-height: 1.05;
     }
-    .timer-digits.warn {
-      color: #facc15;
-    }
-    .timer-digits.go {
-      color: #4ade80;
-    }
+    .timer-digits.warn { color: #facc15; }
+    .timer-digits.go { color: #4ade80; }
 
-    .timer-ms {
-      font-size: 18px;
-    }
+    .timer-ms { font-size: 18px; }
 
     .quick-actions {
       display: flex;
@@ -160,8 +143,8 @@
     }
 
     .q-btn {
-      background: rgba(56, 189, 248, 0.2);
-      border: 1px solid rgba(56, 189, 248, 0.5);
+      background: #1e3a5f;
+      border: 1px solid #38bdf8;
       color: #fff;
       font-size: 13px;
       font-weight: 700;
@@ -169,39 +152,22 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    .q-btn:hover {
-      background: rgba(56, 189, 248, 0.45);
-    }
+    .q-btn:hover { background: #0284c7; }
     .q-btn.active {
       background: #00ff9d;
       color: #090d16;
       border-color: #00ff9d;
     }
 
-    /* 离线提示条 */
-    #offlineWarn {
-      display: none;
-      background: rgba(239, 68, 68, 0.9);
-      color: #fff;
-      font-size: 11px;
-      font-weight: bold;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-top: 4px;
-      text-align: center;
-    }
-
-    /* 下拉设置抽屉 */
+    /* 设置与日志抽屉 */
     #drawer {
       display: none;
       margin-top: 8px;
       padding-top: 8px;
       border-top: 1px solid rgba(255, 255, 255, 0.15);
-      font-size: 13px;
+      font-size: 12px;
     }
-    #drawer.open {
-      display: block;
-    }
+    #drawer.open { display: block; }
 
     .setting-row {
       display: flex;
@@ -211,70 +177,64 @@
     }
 
     .setting-input {
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: #000;
+      border: 1px solid #475569;
       color: #fff;
       font-family: monospace;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
       padding: 3px 6px;
       border-radius: 4px;
-      width: 115px;
+      width: 110px;
       text-align: center;
     }
 
-    .offset-badge {
-      color: #facc15;
-      font-family: monospace;
-      font-weight: bold;
-    }
-
-    .safety-note {
-      font-size: 10px;
-      color: #94a3b8;
-      text-align: center;
-      margin-top: 4px;
+    #logBox {
+      margin-top: 6px;
+      background: #000;
+      border: 1px solid #334155;
+      color: #4ade80;
+      font-family: Consolas, monospace;
+      font-size: 11px;
+      height: 85px;
+      overflow-y: auto;
+      padding: 4px;
+      user-select: text;
+      -webkit-user-select: text;
     }
   </style>
 </head>
 <body>
   <div id="capsule">
-    <!-- 顶部专用拖拽栏与控制按钮 -->
-    <div class="top-bar hide-on-ghost">
+    <div class="top-bar">
       <div class="drag-handle" id="dragBar" data-tauri-drag-region>
         <span id="syncDot" class="sync-dot"></span>
-        <span data-tauri-drag-region>✥ 按住此处拖动窗口</span>
+        <span data-tauri-drag-region>✥ 按住拖动</span>
       </div>
       <div class="status-group">
-        <button class="icon-btn" title="同步北京时间(F5)" onclick="syncNetworkTime()">校准</button>
-        <button class="icon-btn" title="纯字模式(F8)" onclick="toggleGhostMode()">F8</button>
-        <button class="icon-btn" title="展开设置" onclick="toggleDrawer()">⚙</button>
-        <button class="icon-btn close" title="退出" onclick="closeApp()">✕</button>
+        <button class="icon-btn" onclick="syncNetworkTime()">校准</button>
+        <button class="icon-btn" onclick="toggleDrawer()">⚙设置/日志</button>
+        <button class="icon-btn close" onclick="closeApp()">✕</button>
       </div>
     </div>
 
-    <!-- 第一行：北京时间 -->
     <div class="row-clock">
       <div class="clock-digits">
         <span id="bjHMS">00:00:00</span><span class="clock-ms" id="bjMS">.000</span>
       </div>
     </div>
 
-    <div id="offlineWarn">⚠ 网络授时未连接，当前使用系统时间</div>
-
-    <!-- 第二行：主倒计时 + 一键整分/半点 -->
     <div class="row-timer">
       <div id="timerDisplay" class="timer-digits">
         <span id="cdHMS">00:00:00</span><span class="timer-ms" id="cdMS">.000</span>
       </div>
-      <div class="quick-actions hide-on-ghost">
+      <div class="quick-actions">
         <button class="q-btn" onclick="setQuickTarget('min')">整分</button>
         <button class="q-btn" onclick="setQuickTarget('half')">半点</button>
         <button id="toggleBtn" class="q-btn" onclick="toggleTimer()">启动</button>
       </div>
     </div>
 
-    <!-- 折叠设置抽屉 -->
     <div id="drawer">
       <div class="setting-row">
         <span>定点发车:</span>
@@ -283,7 +243,7 @@
       </div>
 
       <div class="setting-row">
-        <span>延迟补偿: <span id="offsetVal" class="offset-badge">-150ms</span></span>
+        <span>延迟补偿: <b id="offsetVal" style="color:#facc15">-150ms</b></span>
         <input id="offsetSlider" type="range" min="-500" max="500" step="10" value="-150" style="width:130px" oninput="updateOffset(this.value)" />
       </div>
 
@@ -293,51 +253,78 @@
         <button class="icon-btn" onclick="playBeep(880, 0.12)">试听</button>
       </div>
 
-      <div class="setting-row" style="font-size:11px; color:#94a3b8;">
-        <span>误差校准: <b id="driftText" style="color:#00ff9d">0 ms</b></span>
-        <span>F5校准 | F6重置 | F7启停 | F8纯字</span>
+      <div style="font-size:11px; color:#94a3b8; margin-top:2px;">
+        实时运行日志（已同步写入桌面 DeltaTimer_Debug.log）：
       </div>
-
-      <div class="safety-note">纯外部透明计时 · 无内存读取 · 无自动点击</div>
+      <div id="logBox"></div>
     </div>
   </div>
 
   <script>
-    // 全局异常保护，严防任何未捕获错误导致桌面端窗口闪退
-    window.onerror = function() { return true; };
-    window.onunhandledrejection = function(e) { if (e && e.preventDefault) e.preventDefault(); return true; };
+    // 双通道日志系统：同时写入界面与电脑桌面 DeltaTimer_Debug.log
+    function writeLog(msg) {
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+      const line = `[${timeStr}] ${msg}`;
+      try {
+        const box = document.getElementById('logBox');
+        if (box) {
+          const div = document.createElement('div');
+          div.textContent = line;
+          box.appendChild(div);
+          box.scrollTop = box.scrollHeight;
+        }
+      } catch (e) {}
+
+      try {
+        if (window.__TAURI__ && window.__TAURI__.tauri) {
+          window.__TAURI__.tauri.invoke('log_to_file', { msg: line }).catch(() => {});
+        }
+      } catch (e) {}
+    }
+
+    window.onerror = function(msg, src, line, col) {
+      writeLog(`ERROR: ${msg} (line:${line})`);
+      return true;
+    };
+    window.onunhandledrejection = function(e) {
+      writeLog(`PROMISE ERR: ${e?.reason || 'unknown'}`);
+      return true;
+    };
+
+    writeLog('前端界面初始化开始...');
 
     let timeOffsetMs = 0;
     let userLatencyMs = -150;
     let volume = 0.8;
-    try {
-      if (localStorage.getItem('delta_offset') !== null) userLatencyMs = Number(localStorage.getItem('delta_offset'));
-      if (localStorage.getItem('delta_vol') !== null) volume = Number(localStorage.getItem('delta_vol'));
-    } catch (e) {}
-
     let targetTimestamp = 0;
     let isRunning = false;
     let lastBeepSec = -1;
     let audioCtx = null;
 
-    document.getElementById('offsetSlider').value = userLatencyMs;
-    document.getElementById('offsetVal').innerText = (userLatencyMs >= 0 ? '+' : '') + userLatencyMs + 'ms';
-    document.getElementById('volSlider').value = Math.round(volume * 100);
+    // 每秒打一次存活心跳日志，方便排查闪退精确时间点
+    let aliveSec = 0;
+    setInterval(() => {
+      aliveSec++;
+      if (aliveSec <= 15 || aliveSec % 10 === 0) {
+        writeLog(`Heartbeat alive: ${aliveSec}s`);
+      }
+    }, 1000);
 
-    // 显式绑定窗口拖拽（兼容 Tauri 原生 API）
     document.getElementById('dragBar').addEventListener('mousedown', (e) => {
       if (e.button === 0 && window.__TAURI__ && window.__TAURI__.window) {
-        try { window.__TAURI__.window.appWindow.startDragging(); } catch (err) {}
+        writeLog('触发窗口拖拽');
+        window.__TAURI__.window.appWindow.startDragging().catch(err => writeLog('拖拽异常:' + err));
       }
     });
 
-    // 懒加载音频上下文（防止启动时因声卡独占直接崩溃）
     function playBeep(freq = 880, duration = 0.1) {
+      writeLog(`播放提示音 freq=${freq}`);
       if (volume <= 0) return;
       try {
         if (!audioCtx) {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          if (AudioContextClass) audioCtx = new AudioContextClass();
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) audioCtx = new AudioCtx();
         }
         if (!audioCtx) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -351,11 +338,12 @@
         gain.connect(audioCtx.destination);
         osc.start();
         osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
+      } catch (e) {
+        writeLog('音频异常: ' + e.message);
+      }
     }
 
-    // 带超时的安全请求工具
-    async function fetchWithTimeout(url, timeout = 2500) {
+    async function fetchWithTimeout(url, timeout = 2200) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeout);
       try {
@@ -368,30 +356,19 @@
       }
     }
 
-    // 国内极速北京时间源（淘宝/苏宁/拼多多 + 国际源兜底）
     async function syncNetworkTime() {
+      writeLog('开始请求网络北京时间...');
       const dot = document.getElementById('syncDot');
-      const warn = document.getElementById('offlineWarn');
-
       const sources = [
-        {
-          url: 'https://acs.m.taobao.com/gw/mtop.common.getTimestamp/',
-          parse: (d) => Number(d?.data?.t)
-        },
-        {
-          url: 'https://f.m.suning.com/api/ct.do',
-          parse: (d) => Number(d?.currentTime)
-        },
-        {
-          url: 'https://api.pinduoduo.com/api/server/_stm',
-          parse: (d) => Number(d?.server_time)
-        }
+        { name: '淘宝', url: 'https://acs.m.taobao.com/gw/mtop.common.getTimestamp/', parse: d => Number(d?.data?.t) },
+        { name: '苏宁', url: 'https://f.m.suning.com/api/ct.do', parse: d => Number(d?.currentTime) },
+        { name: '拼多多', url: 'https://api.pinduoduo.com/api/server/_stm', parse: d => Number(d?.server_time) }
       ];
 
       for (const src of sources) {
         try {
           const t0 = performance.now();
-          const res = await fetchWithTimeout(src.url, 2200);
+          const res = await fetchWithTimeout(src.url, 2000);
           const t1 = performance.now();
           const data = await res.json();
           const serverMs = src.parse(data);
@@ -399,17 +376,15 @@
             const rttHalf = (t1 - t0) / 2;
             timeOffsetMs = Math.round(serverMs + rttHalf - Date.now());
             dot.classList.remove('error');
-            warn.style.display = 'none';
-            document.getElementById('driftText').innerText =
-              (timeOffsetMs >= 0 ? '+' : '') + timeOffsetMs + ' ms';
+            writeLog(`${src.name}授时成功! 偏差=${timeOffsetMs}ms, RTT=${Math.round(t1 - t0)}ms`);
             return;
           }
-        } catch (e) {}
+        } catch (e) {
+          writeLog(`${src.name}源不可用: ${e.message || '跨域或超时'}`);
+        }
       }
-
       dot.classList.add('error');
-      warn.style.display = 'block';
-      document.getElementById('driftText').innerText = '本地时间';
+      writeLog('所有在线源均被拦截，降级使用系统时间');
     }
 
     function getNowBJ() {
@@ -426,15 +401,13 @@
       if (type === 'min') {
         next.setMinutes(now.getMinutes() + 1, 0, 0);
       } else {
-        if (now.getSeconds() < 30) {
-          next.setSeconds(30, 0);
-        } else {
-          next.setMinutes(now.getMinutes() + 1, 0, 0);
-        }
+        if (now.getSeconds() < 30) next.setSeconds(30, 0);
+        else next.setMinutes(now.getMinutes() + 1, 0, 0);
       }
       targetTimestamp = next.getTime();
-      document.getElementById('targetInput').value =
-        `${pad(next.getHours())}:${pad(next.getMinutes())}:${pad(next.getSeconds())}.000`;
+      const str = `${pad(next.getHours())}:${pad(next.getMinutes())}:${pad(next.getSeconds())}.000`;
+      document.getElementById('targetInput').value = str;
+      writeLog(`点击快捷目标 [${type}] -> ${str}`);
       startTimer();
     }
 
@@ -447,6 +420,7 @@
       target.setHours(h || 0, m || 0, s || 0, Number(String(ms).padEnd(3, '0')));
       if (target.getTime() <= now.getTime()) target.setDate(target.getDate() + 1);
       targetTimestamp = target.getTime();
+      writeLog(`设定自定义目标 -> ${raw}`);
       startTimer();
     }
 
@@ -459,12 +433,10 @@
     }
 
     function toggleTimer() {
+      writeLog('点击启停按钮');
       if (!isRunning) {
-        if (!targetTimestamp || targetTimestamp <= getNowBJ().getTime()) {
-          setQuickTarget('min');
-        } else {
-          startTimer();
-        }
+        if (!targetTimestamp || targetTimestamp <= getNowBJ().getTime()) setQuickTarget('min');
+        else startTimer();
       } else {
         isRunning = false;
         const btn = document.getElementById('toggleBtn');
@@ -475,86 +447,74 @@
 
     function updateOffset(val) {
       userLatencyMs = Number(val);
-      try { localStorage.setItem('delta_offset', userLatencyMs); } catch (e) {}
-      document.getElementById('offsetVal').innerText =
-        (userLatencyMs >= 0 ? '+' : '') + userLatencyMs + 'ms';
+      document.getElementById('offsetVal').innerText = (userLatencyMs >= 0 ? '+' : '') + userLatencyMs + 'ms';
+      writeLog(`调整延迟补偿: ${userLatencyMs}ms`);
     }
 
     function updateVol(val) {
       volume = Number(val) / 100;
-      try { localStorage.setItem('delta_vol', volume); } catch (e) {}
     }
 
-    function toggleDrawer() {
-      document.getElementById('drawer').classList.toggle('open');
-    }
-
-    function toggleGhostMode() {
-      document.body.classList.toggle('ghost-mode');
+    async function toggleDrawer() {
+      const drawer = document.getElementById('drawer');
+      const isOpen = drawer.classList.toggle('open');
+      writeLog(`展开设置与日志面板: ${isOpen}`);
+      try {
+        if (window.__TAURI__ && window.__TAURI__.window) {
+          const LogicalSize = window.__TAURI__.window.LogicalSize;
+          await window.__TAURI__.window.appWindow.setSize(new LogicalSize(355, isOpen ? 340 : 125));
+        }
+      } catch (e) {
+        writeLog('调整窗口尺寸失败: ' + e.message);
+      }
     }
 
     function closeApp() {
-      try {
-        if (window.__TAURI__ && window.__TAURI__.window) {
-          window.__TAURI__.window.appWindow.close();
-        } else {
-          window.close();
-        }
-      } catch (e) {}
+      writeLog('用户点击关闭按钮');
+      if (window.__TAURI__ && window.__TAURI__.window) {
+        window.__TAURI__.window.appWindow.close();
+      } else {
+        window.close();
+      }
     }
 
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'F5') { e.preventDefault(); syncNetworkTime(); }
-      if (e.key === 'F6') {
-        e.preventDefault();
-        isRunning = false;
-        document.getElementById('cdHMS').innerText = '00:00:00';
-        document.getElementById('cdMS').innerText = '.000';
-      }
-      if (e.key === 'F7') { e.preventDefault(); toggleTimer(); }
-      if (e.key === 'F8') { e.preventDefault(); toggleGhostMode(); }
-    });
-
     function tick() {
-      try {
-        const now = getNowBJ();
-        document.getElementById('bjHMS').innerText =
-          `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-        document.getElementById('bjMS').innerText = `.${pad(now.getMilliseconds(), 3)}`;
+      const now = getNowBJ();
+      document.getElementById('bjHMS').innerText = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      document.getElementById('bjMS').innerText = `.${pad(now.getMilliseconds(), 3)}`;
 
-        if (isRunning && targetTimestamp > 0) {
-          const effectiveTarget = targetTimestamp + userLatencyMs;
-          const diff = effectiveTarget - now.getTime();
-          const box = document.getElementById('timerDisplay');
+      if (isRunning && targetTimestamp > 0) {
+        const effectiveTarget = targetTimestamp + userLatencyMs;
+        const diff = effectiveTarget - now.getTime();
+        const box = document.getElementById('timerDisplay');
 
-          if (diff > 0) {
-            const secLeft = Math.ceil(diff / 1000);
-            if (secLeft <= 3 && secLeft !== lastBeepSec) {
-              lastBeepSec = secLeft;
-              playBeep(780, 0.09);
-              box.className = 'timer-digits warn';
-            } else if (secLeft > 3) {
-              box.className = 'timer-digits';
-            }
-
-            const h = Math.floor(diff / 3600000);
-            const m = Math.floor((diff % 3600000) / 60000);
-            const s = Math.floor((diff % 60000) / 1000);
-            const ms = diff % 1000;
-            document.getElementById('cdHMS').innerText = `${pad(h)}:${pad(m)}:${pad(s)}`;
-            document.getElementById('cdMS').innerText = `.${pad(ms, 3)}`;
-          } else {
-            isRunning = false;
-            playBeep(1320, 0.35);
-            box.className = 'timer-digits go';
-            document.getElementById('cdHMS').innerText = '00:00:00';
-            document.getElementById('cdMS').innerText = '.000';
-            const btn = document.getElementById('toggleBtn');
-            btn.innerText = '启动';
-            btn.classList.remove('active');
+        if (diff > 0) {
+          const secLeft = Math.ceil(diff / 1000);
+          if (secLeft <= 3 && secLeft !== lastBeepSec) {
+            lastBeepSec = secLeft;
+            playBeep(780, 0.09);
+            box.className = 'timer-digits warn';
+          } else if (secLeft > 3) {
+            box.className = 'timer-digits';
           }
+          const h = Math.floor(diff / 3600000);
+          const m = Math.floor((diff % 3600000) / 60000);
+          const s = Math.floor((diff % 60000) / 1000);
+          const ms = diff % 1000;
+          document.getElementById('cdHMS').innerText = `${pad(h)}:${pad(m)}:${pad(s)}`;
+          document.getElementById('cdMS').innerText = `.${pad(ms, 3)}`;
+        } else {
+          isRunning = false;
+          writeLog('倒计时归零，触发发车提示音！');
+          playBeep(1320, 0.35);
+          box.className = 'timer-digits go';
+          document.getElementById('cdHMS').innerText = '00:00:00';
+          document.getElementById('cdMS').innerText = '.000';
+          const btn = document.getElementById('toggleBtn');
+          btn.innerText = '启动';
+          btn.classList.remove('active');
         }
-      } catch (e) {}
+      }
       requestAnimationFrame(tick);
     }
 
