@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>三角洲撞车计时器</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: transparent !important;
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+
+    /* 主悬浮胶囊 */
+    #capsule {
+      width: 350px;
+      background: rgba(12, 16, 22, 0.86);
+      border: 1px solid rgba(0, 255, 157, 0.35);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+      transition: background 0.2s, border 0.2s;
+    }
+
+    /* 幽灵纯字模式 (F8) */
+    body.ghost-mode #capsule {
+      background: transparent !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+    }
+    body.ghost-mode .hide-on-ghost,
+    body.ghost-mode #drawer {
+      display: none !important;
+    }
+
+    /* 第一行：北京时间 + 状态与窗口控制 */
+    .row-clock {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      cursor: move;
+    }
+
+    .clock-digits {
+      font-family: "Consolas", "JetBrains Mono", monospace;
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 255, 157, 0.3);
+      line-height: 1.05;
+    }
+
+    .clock-ms {
+      font-size: 20px;
+      color: #00ff9d;
+      margin-left: 2px;
+    }
+
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00ff9d;
+      box-shadow: 0 0 6px #00ff9d;
+      cursor: pointer;
+    }
+    .sync-dot.error {
+      background: #ff3b3b;
+      box-shadow: 0 0 8px #ff3b3b;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .icon-btn:hover {
+      background: rgba(0, 255, 157, 0.2);
+      color: #fff;
+    }
+    .icon-btn.close:hover {
+      background: rgba(255, 59, 59, 0.8);
+    }
+
+    /* 第二行：主倒计时 + 快捷按钮 */
+    .row-timer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .timer-digits {
+      font-family: "Consolas", "JetBrains Mono", monospace;
+      font-size: 28px;
+      font-weight: 900;
+      color: #38bdf8;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+      line-height: 1.05;
+    }
+    .timer-digits.warn {
+      color: #facc15;
+      text-shadow: 0 0 10px rgba(250, 204, 21, 0.7);
+    }
+    .timer-digits.go {
+      color: #4ade80;
+      text-shadow: 0 0 12px rgba(74, 222, 128, 0.9);
+    }
+
+    .timer-ms {
+      font-size: 18px;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .q-btn {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #e0f2fe;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .q-btn:hover {
+      background: rgba(56, 189, 248, 0.35);
+    }
+    .q-btn.active {
+      background: #00ff9d;
+      color: #090d16;
+      border-color: #00ff9d;
+    }
+
+    /* 离线警告条 */
+    #offlineWarn {
+      display: none;
+      background: rgba(239, 68, 68, 0.9);
+      color: #fff;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    /* 下拉设置抽屉 */
+    #drawer {
+      display: none;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 13px;
+    }
+    #drawer.open {
+      display: block;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .setting-input {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      width: 115px;
+      text-align: center;
+    }
+
+    .offset-badge {
+      color: #facc15;
+      font-family: monospace;
+      font-weight: bold;
+    }
+
+    .safety-note {
+      font-size: 10px;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div id="capsule">
+    <!-- 第一行：按住时间数字可拖动整个桌面窗口 -->
+    <div class="row-clock" data-tauri-drag-region>
+      <div class="clock-digits" data-tauri-drag-region>
+        <span id="bjHMS" data-tauri-drag-region>00:00:00</span><span class="clock-ms" id="bjMS" data-tauri-drag-region>.000</span>
+      </div>
+      <div class="status-group hide-on-ghost">
+        <div id="syncDot" class="sync-dot" title="点击立即同步网络北京时间 (F5)" onclick="syncNetworkTime()"></div>
+        <button class="icon-btn" title="纯字模式 (F8)" onclick="toggleGhostMode()">F8</button>
+        <button class="icon-btn" title="展开/收起设置" onclick="toggleDrawer()">⚙</button>
+        <button class="icon-btn close" title="退出软件" onclick="closeApp()">✕</button>
+      </div>
+    </div>
+
+    <div id="offlineWarn">⚠ 网络授时失败，当前为本地时间，切勿撞车！</div>
+
+    <!-- 第二行：主倒计时 + 一键整分/半点 -->
+    <div class="row-timer">
+      <div id="timerDisplay" class="timer-digits">
+        <span id="cdHMS">00:00:00</span><span class="timer-ms" id="cdMS">.000</span>
+      </div>
+      <div class="quick-actions hide-on-ghost">
+        <button class="q-btn" onclick="setQuickTarget('min')">整分</button>
+        <button class="q-btn" onclick="setQuickTarget('half')">半点</button>
+        <button id="toggleBtn" class="q-btn" onclick="toggleTimer()">启动</button>
+      </div>
+    </div>
+
+    <!-- 折叠设置抽屉 -->
+    <div id="drawer">
+      <div class="setting-row">
+        <span>定点发车:</span>
+        <input id="targetInput" class="setting-input" type="text" value="20:00:00.000" />
+        <button class="q-btn" onclick="applyCustomTarget()">设定</button>
+      </div>
+
+      <div class="setting-row">
+        <span>延迟补偿: <span id="offsetVal" class="offset-badge">-150ms</span></span>
+        <input id="offsetSlider" type="range" min="-500" max="500" step="10" value="-150" style="width:130px" oninput="updateOffset(this.value)" />
+      </div>
+
+      <div class="setting-row">
+        <span>提示音量:</span>
+        <input id="volSlider" type="range" min="0" max="100" value="80" style="width:100px" oninput="updateVol(this.value)" />
+        <button class="icon-btn" onclick="playBeep(880, 0.12)">试听</button>
+      </div>
+
+      <div class="setting-row" style="font-size:11px; color:#94a3b8;">
+        <span>校准差值: <b id="driftText" style="color:#00ff9d">-- ms</b></span>
+        <span>F5校准 | F6重置 | F7启停 | F8纯字</span>
+      </div>
+
+      <div class="safety-note">纯外部透明计时显示 · 无内存读取 · 无自动点击</div>
+    </div>
+  </div>
+
+  <script>
+    // 状态与本地持久化配置
+    let timeOffsetMs = 0; // 网络标准时间 - 本地时间
+    let userLatencyMs = Number(localStorage.getItem('delta_offset') ?? -150);
+    let volume = Number(localStorage.getItem('delta_vol') ?? 0.8);
+    let targetTimestamp = 0;
+    let isRunning = false;
+    let lastBeepSec = -1;
+
+    document.getElementById('offsetSlider').value = userLatencyMs;
+    document.getElementById('offsetVal').innerText = (userLatencyMs >= 0 ? '+' : '') + userLatencyMs + 'ms';
+    document.getElementById('volSlider').value = Math.round(volume * 100);
+
+    // Web Audio 合成提示音
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq = 880, duration = 0.1) {
+      if (volume <= 0) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(volume * 0.4, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    // 多源网络北京时间同步（含 RTT 往返折半补偿）
+    async function syncNetworkTime() {
+      const dot = document.getElementById('syncDot');
+      const warn = document.getElementById('offlineWarn');
+      const apis = [
+        'https://worldtimeapi.org/api/timezone/Asia/Shanghai',
+        'https://timeapi.io/api/Time/current/zone?timeZone=Asia/Shanghai'
+      ];
+
+      for (const url of apis) {
+        try {
+          const t0 = performance.now();
+          const res = await fetch(url, { cache: 'no-store' });
+          const t1 = performance.now();
+          const data = await res.json();
+          const rttHalf = (t1 - t0) / 2;
+
+          let serverMs = data.unixtime
+            ? data.unixtime * 1000 + Number((data.datetime.split('.')[1] || '0').slice(0, 3))
+            : new Date(data.dateTime).getTime();
+
+          timeOffsetMs = Math.round(serverMs + rttHalf - Date.now());
+          dot.classList.remove('error');
+          warn.style.display = 'none';
+          document.getElementById('driftText').innerText = (timeOffsetMs >= 0 ? '+' : '') + timeOffsetMs + ' ms';
+          return;
+        } catch (e) {}
+      }
+
+      // 降级警告
+      dot.classList.add('error');
+      warn.style.display = 'block';
+      document.getElementById('driftText').innerText = '授时失败';
+    }
+
+    function getNowBJ() {
+      return new Date(Date.now() + timeOffsetMs);
+    }
+
+    function pad(n, len = 2) {
+      return String(n).padStart(len, '0');
+    }
+
+    // 一键设下一整分 / 半点
+    function setQuickTarget(type) {
+      const now = getNowBJ();
+      const next = new Date(now.getTime());
+      if (type === 'min') {
+        next.setMinutes(now.getMinutes() + 1, 0, 0);
+      } else {
+        if (now.getSeconds() < 30) {
+          next.setSeconds(30, 0);
+        } else {
+          next.setMinutes(now.getMinutes() + 1, 0, 0);
+        }
+      }
+      targetTimestamp = next.getTime();
+      document.getElementById('targetInput').value =
+        `${pad(next.getHours())}:${pad(next.getMinutes())}:${pad(next.getSeconds())}.000`;
+      startTimer();
+    }
+
+    function applyCustomTarget() {
+      const raw = document.getElementById('targetInput').value.trim();
+      const [hms, ms = '0'] = raw.split('.');
+      const [h, m, s] = hms.split(':').map(Number);
+      const now = getNowBJ();
+      const target = new Date(now.getTime());
+      target.setHours(h || 0, m || 0, s || 0, Number(ms.padEnd(3, '0')));
+      if (target.getTime() <= now.getTime()) target.setDate(target.getDate() + 1);
+      targetTimestamp = target.getTime();
+      startTimer();
+    }
+
+    function startTimer() {
+      isRunning = true;
+      lastBeepSec = -1;
+      const btn = document.getElementById('toggleBtn');
+      btn.innerText = '停止';
+      btn.classList.add('active');
+    }
+
+    function toggleTimer() {
+      if (!isRunning) {
+        if (!targetTimestamp || targetTimestamp <= getNowBJ().getTime()) {
+          setQuickTarget('min');
+        } else {
+          startTimer();
+        }
+      } else {
+        isRunning = false;
+        const btn = document.getElementById('toggleBtn');
+        btn.innerText = '启动';
+        btn.classList.remove('active');
+      }
+    }
+
+    function updateOffset(val) {
+      userLatencyMs = Number(val);
+      localStorage.setItem('delta_offset', userLatencyMs);
+      document.getElementById('offsetVal').innerText =
+        (userLatencyMs >= 0 ? '+' : '') + userLatencyMs + 'ms';
+    }
+
+    function updateVol(val) {
+      volume = Number(val) / 100;
+      localStorage.setItem('delta_vol', volume);
+    }
+
+    function toggleDrawer() {
+      document.getElementById('drawer').classList.toggle('open');
+    }
+
+    function toggleGhostMode() {
+      document.body.classList.toggle('ghost-mode');
+    }
+
+    function closeApp() {
+      if (window.__TAURI__) {
+        window.__TAURI__.window.appWindow.close();
+      } else {
+        window.close();
+      }
+    }
+
+    // 键盘快捷键监听
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'F5') { e.preventDefault(); syncNetworkTime(); }
+      if (e.key === 'F6') { e.preventDefault(); isRunning = false; document.getElementById('cdHMS').innerText = '00:00:00'; document.getElementById('cdMS').innerText = '.000'; }
+      if (e.key === 'F7') { e.preventDefault(); toggleTimer(); }
+      if (e.key === 'F8') { e.preventDefault(); toggleGhostMode(); }
+    });
+
+    // 60FPS 毫秒级渲染主循环
+    function tick() {
+      const now = getNowBJ();
+      document.getElementById('bjHMS').innerText =
+        `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      document.getElementById('bjMS').innerText = `.${pad(now.getMilliseconds(), 3)}`;
+
+      if (isRunning && targetTimestamp > 0) {
+        // 叠加玩家延迟补偿：例如 -150ms 表示提前 150ms 归零响铃
+        const effectiveTarget = targetTimestamp + userLatencyMs;
+        const diff = effectiveTarget - now.getTime();
+        const box = document.getElementById('timerDisplay');
+
+        if (diff > 0) {
+          const secLeft = Math.ceil(diff / 1000);
+          if (secLeft <= 3 && secLeft !== lastBeepSec) {
+            lastBeepSec = secLeft;
+            playBeep(780, 0.09);
+            box.className = 'timer-digits warn';
+          } else if (secLeft > 3) {
+            box.className = 'timer-digits';
+          }
+
+          const h = Math.floor(diff / 3600000);
+          const m = Math.floor((diff % 3600000) / 60000);
+          const s = Math.floor((diff % 60000) / 1000);
+          const ms = diff % 1000;
+          document.getElementById('cdHMS').innerText = `${pad(h)}:${pad(m)}:${pad(s)}`;
+          document.getElementById('cdMS').innerText = `.${pad(ms, 3)}`;
+        } else {
+          // 触发发车！
+          isRunning = false;
+          playBeep(1320, 0.35);
+          box.className = 'timer-digits go';
+          document.getElementById('cdHMS').innerText = '00:00:00';
+          document.getElementById('cdMS').innerText = '.000';
+          const btn = document.getElementById('toggleBtn');
+          btn.innerText = '启动';
+          btn.classList.remove('active');
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    syncNetworkTime();
+    setInterval(syncNetworkTime, 45000);
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
