@@ -17,7 +17,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #0e131a;
+      background: transparent !important;
       color: #fff;
       font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
     }
@@ -25,11 +25,40 @@
     #capsule {
       width: 100%;
       height: 100%;
-      background: #0e131a;
-      border: 1.5px solid rgba(0, 255, 157, 0.5);
+      background: rgba(14, 19, 26, 0.82);
+      border: 1.5px solid rgba(0, 255, 157, 0.45);
+      border-radius: 10px;
       padding: 6px 12px;
       display: flex;
       flex-direction: column;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    /* 幽灵纯字模式 (F8) */
+    body.ghost-mode #capsule {
+      background: rgba(0, 0, 0, 0.01) !important;
+      border-color: transparent !important;
+    }
+    body.ghost-mode .hide-on-ghost,
+    body.ghost-mode #drawer {
+      display: none !important;
+    }
+    /* 纯字模式下仅保留一个半透明小恢复按钮，防止找不到入口 */
+    #restoreGhostBtn {
+      display: none;
+      position: fixed;
+      top: 4px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(0, 255, 157, 0.5);
+      color: #00ff9d;
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    body.ghost-mode #restoreGhostBtn {
+      display: block;
     }
 
     /* 顶部栏 */
@@ -39,18 +68,19 @@
       justify-content: space-between;
       padding-bottom: 4px;
       margin-bottom: 4px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .drag-handle {
       flex: 1;
       font-size: 12px;
-      color: #94a3b8;
+      color: #cbd5e1;
       cursor: move;
       display: flex;
       align-items: center;
       gap: 6px;
       padding: 2px 0;
+      text-shadow: 0 1px 2px #000;
     }
     .drag-handle:hover {
       color: #00ff9d;
@@ -76,12 +106,12 @@
     }
 
     .icon-btn {
-      background: #1e293b;
-      border: 1px solid #475569;
-      color: #e2e8f0;
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: #f1f5f9;
       font-size: 12px;
       font-weight: bold;
-      padding: 2px 7px;
+      padding: 2px 6px;
       border-radius: 4px;
       cursor: pointer;
     }
@@ -96,7 +126,7 @@
       border-color: #ef4444;
     }
 
-    /* 第一行：北京时间大字 */
+    /* 第一行：北京时间大字（加厚黑色轮廓描边，透明背景下也极其清晰） */
     .row-clock {
       display: flex;
       align-items: baseline;
@@ -108,6 +138,7 @@
       font-size: 32px;
       font-weight: 900;
       color: #ffffff;
+      text-shadow: 0 0 3px #000, 0 2px 4px #000, 1px 1px 0 #000, -1px -1px 0 #000;
       line-height: 1.05;
     }
 
@@ -130,6 +161,7 @@
       font-size: 28px;
       font-weight: 900;
       color: #38bdf8;
+      text-shadow: 0 0 3px #000, 0 2px 4px #000, 1px 1px 0 #000, -1px -1px 0 #000;
       line-height: 1.05;
     }
     .timer-digits.warn { color: #facc15; }
@@ -143,7 +175,7 @@
     }
 
     .q-btn {
-      background: #1e3a5f;
+      background: rgba(30, 58, 95, 0.85);
       border: 1px solid #38bdf8;
       color: #fff;
       font-size: 13px;
@@ -159,7 +191,7 @@
       border-color: #00ff9d;
     }
 
-    /* 设置与日志抽屉 */
+    /* 设置抽屉 */
     #drawer {
       display: none;
       margin-top: 8px;
@@ -174,10 +206,11 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 6px;
+      text-shadow: 0 1px 2px #000;
     }
 
     .setting-input {
-      background: #000;
+      background: rgba(0, 0, 0, 0.75);
       border: 1px solid #475569;
       color: #fff;
       font-family: monospace;
@@ -188,38 +221,27 @@
       width: 110px;
       text-align: center;
     }
-
-    #logBox {
-      margin-top: 6px;
-      background: #000;
-      border: 1px solid #334155;
-      color: #4ade80;
-      font-family: Consolas, monospace;
-      font-size: 11px;
-      height: 85px;
-      overflow-y: auto;
-      padding: 4px;
-      user-select: text;
-      -webkit-user-select: text;
-    }
   </style>
 </head>
 <body>
+  <button id="restoreGhostBtn" onclick="toggleGhostMode()">还原(F8)</button>
+
   <div id="capsule">
-    <div class="top-bar">
+    <div class="top-bar hide-on-ghost">
       <div class="drag-handle" id="dragBar" data-tauri-drag-region>
         <span id="syncDot" class="sync-dot"></span>
         <span data-tauri-drag-region>✥ 按住拖动</span>
       </div>
       <div class="status-group">
         <button class="icon-btn" onclick="syncNetworkTime()">校准</button>
-        <button class="icon-btn" onclick="toggleDrawer()">⚙设置/日志</button>
+        <button class="icon-btn" onclick="toggleGhostMode()">纯字</button>
+        <button class="icon-btn" onclick="toggleDrawer()">⚙设置</button>
         <button class="icon-btn close" onclick="closeApp()">✕</button>
       </div>
     </div>
 
     <div class="row-clock">
-      <div class="clock-digits">
+      <div class="clock-digits" data-tauri-drag-region>
         <span id="bjHMS">00:00:00</span><span class="clock-ms" id="bjMS">.000</span>
       </div>
     </div>
@@ -228,7 +250,7 @@
       <div id="timerDisplay" class="timer-digits">
         <span id="cdHMS">00:00:00</span><span class="timer-ms" id="cdMS">.000</span>
       </div>
-      <div class="quick-actions">
+      <div class="quick-actions hide-on-ghost">
         <button class="q-btn" onclick="setQuickTarget('min')">整分</button>
         <button class="q-btn" onclick="setQuickTarget('half')">半点</button>
         <button id="toggleBtn" class="q-btn" onclick="toggleTimer()">启动</button>
@@ -243,6 +265,11 @@
       </div>
 
       <div class="setting-row">
+        <span>背景透明度: <b id="alphaVal" style="color:#00ff9d">82%</b></span>
+        <input id="alphaSlider" type="range" min="0" max="100" step="5" value="82" style="width:130px" oninput="updateAlpha(this.value)" />
+      </div>
+
+      <div class="setting-row">
         <span>延迟补偿: <b id="offsetVal" style="color:#facc15">-150ms</b></span>
         <input id="offsetSlider" type="range" min="-500" max="500" step="10" value="-150" style="width:130px" oninput="updateOffset(this.value)" />
       </div>
@@ -252,74 +279,43 @@
         <input id="volSlider" type="range" min="0" max="100" value="80" style="width:100px" oninput="updateVol(this.value)" />
         <button class="icon-btn" onclick="playBeep(880, 0.12)">试听</button>
       </div>
-
-      <div style="font-size:11px; color:#94a3b8; margin-top:2px;">
-        实时运行日志（已同步写入桌面 DeltaTimer_Debug.log）：
-      </div>
-      <div id="logBox"></div>
     </div>
   </div>
 
   <script>
-    // 双通道日志系统：同时写入界面与电脑桌面 DeltaTimer_Debug.log
-    function writeLog(msg) {
-      const now = new Date();
-      const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
-      const line = `[${timeStr}] ${msg}`;
-      try {
-        const box = document.getElementById('logBox');
-        if (box) {
-          const div = document.createElement('div');
-          div.textContent = line;
-          box.appendChild(div);
-          box.scrollTop = box.scrollHeight;
-        }
-      } catch (e) {}
-
-      try {
-        if (window.__TAURI__ && window.__TAURI__.tauri) {
-          window.__TAURI__.tauri.invoke('log_to_file', { msg: line }).catch(() => {});
-        }
-      } catch (e) {}
-    }
-
-    window.onerror = function(msg, src, line, col) {
-      writeLog(`ERROR: ${msg} (line:${line})`);
-      return true;
-    };
-    window.onunhandledrejection = function(e) {
-      writeLog(`PROMISE ERR: ${e?.reason || 'unknown'}`);
-      return true;
-    };
-
-    writeLog('前端界面初始化开始...');
-
     let timeOffsetMs = 0;
-    let userLatencyMs = -150;
-    let volume = 0.8;
+    let userLatencyMs = Number(localStorage.getItem('delta_offset') ?? -150);
+    let volume = Number(localStorage.getItem('delta_vol') ?? 0.8);
+    let bgAlpha = Number(localStorage.getItem('delta_alpha') ?? 82);
     let targetTimestamp = 0;
     let isRunning = false;
     let lastBeepSec = -1;
     let audioCtx = null;
 
-    // 每秒打一次存活心跳日志，方便排查闪退精确时间点
-    let aliveSec = 0;
-    setInterval(() => {
-      aliveSec++;
-      if (aliveSec <= 15 || aliveSec % 10 === 0) {
-        writeLog(`Heartbeat alive: ${aliveSec}s`);
-      }
-    }, 1000);
+    document.getElementById('offsetSlider').value = userLatencyMs;
+    document.getElementById('offsetVal').innerText = (userLatencyMs >= 0 ? '+' : '') + userLatencyMs + 'ms';
+    document.getElementById('volSlider').value = Math.round(volume * 100);
+    document.getElementById('alphaSlider').value = bgAlpha;
+    updateAlpha(bgAlpha);
 
     document.getElementById('dragBar').addEventListener('mousedown', (e) => {
       if (e.button === 0 && window.__TAURI__ && window.__TAURI__.window) {
-        writeLog('触发窗口拖拽');
-        window.__TAURI__.window.appWindow.startDragging().catch(err => writeLog('拖拽异常:' + err));
+        window.__TAURI__.window.appWindow.startDragging().catch(() => {});
       }
     });
 
+    function updateAlpha(val) {
+      bgAlpha = Number(val);
+      localStorage.setItem('delta_alpha', bgAlpha);
+      document.getElementById('alphaVal').innerText = bgAlpha + '%';
+      const capsule = document.getElementById('capsule');
+      // 保留至少 0.01 透明度防止部分显卡驱动丢焦点
+      const realAlpha = Math.max(0.01, bgAlpha / 100);
+      capsule.style.background = `rgba(14, 19, 26, ${realAlpha})`;
+      capsule.style.borderColor = bgAlpha === 0 ? 'transparent' : `rgba(0, 255, 157, ${Math.min(0.5, realAlpha)})`;
+    }
+
     function playBeep(freq = 880, duration = 0.1) {
-      writeLog(`播放提示音 freq=${freq}`);
       if (volume <= 0) return;
       try {
         if (!audioCtx) {
@@ -338,9 +334,7 @@
         gain.connect(audioCtx.destination);
         osc.start();
         osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {
-        writeLog('音频异常: ' + e.message);
-      }
+      } catch (e) {}
     }
 
     async function fetchWithTimeout(url, timeout = 2200) {
@@ -357,12 +351,11 @@
     }
 
     async function syncNetworkTime() {
-      writeLog('开始请求网络北京时间...');
       const dot = document.getElementById('syncDot');
       const sources = [
-        { name: '淘宝', url: 'https://acs.m.taobao.com/gw/mtop.common.getTimestamp/', parse: d => Number(d?.data?.t) },
-        { name: '苏宁', url: 'https://f.m.suning.com/api/ct.do', parse: d => Number(d?.currentTime) },
-        { name: '拼多多', url: 'https://api.pinduoduo.com/api/server/_stm', parse: d => Number(d?.server_time) }
+        { url: 'https://acs.m.taobao.com/gw/mtop.common.getTimestamp/', parse: d => Number(d?.data?.t) },
+        { url: 'https://f.m.suning.com/api/ct.do', parse: d => Number(d?.currentTime) },
+        { url: 'https://api.pinduoduo.com/api/server/_stm', parse: d => Number(d?.server_time) }
       ];
 
       for (const src of sources) {
@@ -376,15 +369,11 @@
             const rttHalf = (t1 - t0) / 2;
             timeOffsetMs = Math.round(serverMs + rttHalf - Date.now());
             dot.classList.remove('error');
-            writeLog(`${src.name}授时成功! 偏差=${timeOffsetMs}ms, RTT=${Math.round(t1 - t0)}ms`);
             return;
           }
-        } catch (e) {
-          writeLog(`${src.name}源不可用: ${e.message || '跨域或超时'}`);
-        }
+        } catch (e) {}
       }
       dot.classList.add('error');
-      writeLog('所有在线源均被拦截，降级使用系统时间');
     }
 
     function getNowBJ() {
@@ -405,9 +394,8 @@
         else next.setMinutes(now.getMinutes() + 1, 0, 0);
       }
       targetTimestamp = next.getTime();
-      const str = `${pad(next.getHours())}:${pad(next.getMinutes())}:${pad(next.getSeconds())}.000`;
-      document.getElementById('targetInput').value = str;
-      writeLog(`点击快捷目标 [${type}] -> ${str}`);
+      document.getElementById('targetInput').value =
+        `${pad(next.getHours())}:${pad(next.getMinutes())}:${pad(next.getSeconds())}.000`;
       startTimer();
     }
 
@@ -420,7 +408,6 @@
       target.setHours(h || 0, m || 0, s || 0, Number(String(ms).padEnd(3, '0')));
       if (target.getTime() <= now.getTime()) target.setDate(target.getDate() + 1);
       targetTimestamp = target.getTime();
-      writeLog(`设定自定义目标 -> ${raw}`);
       startTimer();
     }
 
@@ -433,7 +420,6 @@
     }
 
     function toggleTimer() {
-      writeLog('点击启停按钮');
       if (!isRunning) {
         if (!targetTimestamp || targetTimestamp <= getNowBJ().getTime()) setQuickTarget('min');
         else startTimer();
@@ -447,36 +433,66 @@
 
     function updateOffset(val) {
       userLatencyMs = Number(val);
+      localStorage.setItem('delta_offset', userLatencyMs);
       document.getElementById('offsetVal').innerText = (userLatencyMs >= 0 ? '+' : '') + userLatencyMs + 'ms';
-      writeLog(`调整延迟补偿: ${userLatencyMs}ms`);
     }
 
     function updateVol(val) {
       volume = Number(val) / 100;
+      localStorage.setItem('delta_vol', volume);
     }
 
     async function toggleDrawer() {
       const drawer = document.getElementById('drawer');
       const isOpen = drawer.classList.toggle('open');
-      writeLog(`展开设置与日志面板: ${isOpen}`);
       try {
         if (window.__TAURI__ && window.__TAURI__.window) {
           const LogicalSize = window.__TAURI__.window.LogicalSize;
-          await window.__TAURI__.window.appWindow.setSize(new LogicalSize(355, isOpen ? 340 : 125));
+          await window.__TAURI__.window.appWindow.setSize(new LogicalSize(355, isOpen ? 265 : 125));
         }
-      } catch (e) {
-        writeLog('调整窗口尺寸失败: ' + e.message);
+      } catch (e) {}
+    }
+
+    async function toggleGhostMode() {
+      const isGhost = document.body.classList.toggle('ghost-mode');
+      if (isGhost) {
+        document.getElementById('drawer').classList.remove('open');
+        try {
+          if (window.__TAURI__ && window.__TAURI__.window) {
+            const LogicalSize = window.__TAURI__.window.LogicalSize;
+            await window.__TAURI__.window.appWindow.setSize(new LogicalSize(355, 100));
+          }
+        } catch (e) {}
+      } else {
+        updateAlpha(bgAlpha);
+        try {
+          if (window.__TAURI__ && window.__TAURI__.window) {
+            const LogicalSize = window.__TAURI__.window.LogicalSize;
+            await window.__TAURI__.window.appWindow.setSize(new LogicalSize(355, 125));
+          }
+        } catch (e) {}
       }
     }
 
     function closeApp() {
-      writeLog('用户点击关闭按钮');
       if (window.__TAURI__ && window.__TAURI__.window) {
         window.__TAURI__.window.appWindow.close();
       } else {
         window.close();
       }
     }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'F5') { e.preventDefault(); syncNetworkTime(); }
+      if (e.key === 'F6') {
+        e.preventDefault();
+        isRunning = false;
+        document.getElementById('cdHMS').innerText = '00:00:00';
+        document.getElementById('cdMS').innerText = '.000';
+      }
+      if (e.key === 'F7') { e.preventDefault(); toggleTimer(); }
+      if (e.key === 'F8') { e.preventDefault(); toggleGhostMode(); }
+    });
 
     function tick() {
       const now = getNowBJ();
@@ -505,7 +521,6 @@
           document.getElementById('cdMS').innerText = `.${pad(ms, 3)}`;
         } else {
           isRunning = false;
-          writeLog('倒计时归零，触发发车提示音！');
           playBeep(1320, 0.35);
           box.className = 'timer-digits go';
           document.getElementById('cdHMS').innerText = '00:00:00';
