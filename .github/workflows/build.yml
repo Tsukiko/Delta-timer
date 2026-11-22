@@ -1,4 +1,4 @@
-name: Auto Generate & Build EXE (With Crash Logger)
+name: Auto Generate & Build EXE (Transparent Stable)
 
 on:
   push:
@@ -36,21 +36,11 @@ jobs:
             },
             "package": {
               "productName": "DeltaTimer",
-              "version": "1.1.0"
+              "version": "1.2.0"
             },
             "tauri": {
               "allowlist": {
                 "all": true,
-                "fs": {
-                  "all": true,
-                  "readFile": true,
-                  "writeFile": true,
-                  "createDir": true,
-                  "scope": ["$DESKTOP/*", "$APPDATA/*", "**"]
-                },
-                "path": {
-                  "all": true
-                },
                 "window": {
                   "all": true,
                   "close": true,
@@ -77,9 +67,9 @@ jobs:
                   "title": "DeltaTimer",
                   "width": 355,
                   "height": 125,
-                  "resizable": true,
+                  "resizable": false,
                   "decorations": false,
-                  "transparent": false,
+                  "transparent": true,
                   "alwaysOnTop": true,
                   "x": 30,
                   "y": 30
@@ -91,74 +81,14 @@ jobs:
           $utf8NoBom = New-Object System.Text.UTF8Encoding $false
           [System.IO.File]::WriteAllText("$PWD/src-tauri/tauri.conf.json", $json, $utf8NoBom)
 
-      - name: Inject Rust Crash Logger & Disable WebView2 GPU Crash
+      - name: Enable Window Features in Cargo.toml
         shell: powershell
         run: |
           $utf8NoBom = New-Object System.Text.UTF8Encoding $false
-
-          # 1. 开启 Cargo.toml 所有 API 特性
           $cargoPath = "$PWD/src-tauri/Cargo.toml"
           $cargo = Get-Content $cargoPath -Raw
           $cargo = $cargo -replace 'features = \[\]', 'features = ["api-all"]'
           [System.IO.File]::WriteAllText($cargoPath, $cargo, $utf8NoBom)
-
-          # 2. 注入 Rust 底层日志与防崩溃 main.rs
-          $mainRs = @'
-          #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
-          use std::fs::OpenOptions;
-          use std::io::Write;
-          use std::panic;
-
-          fn write_desktop_log(msg: &str) {
-              if let Some(home) = std::env::var_os("USERPROFILE") {
-                  let mut path = std::path::PathBuf::from(home);
-                  path.push("Desktop");
-                  path.push("DeltaTimer_Debug.log");
-                  if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(path) {
-                      let _ = writeln!(file, "{}", msg);
-                  }
-              }
-          }
-
-          #[tauri::command]
-          fn log_to_file(msg: String) {
-              write_desktop_log(&format!("[JS] {}", msg));
-          }
-
-          fn main() {
-              // 禁用 WebView2 透明合成 GPU 崩溃问题
-              std::env::set_var("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--disable-gpu-compositing");
-
-              write_desktop_log("==========================================");
-              write_desktop_log("[RUST] Process starting up...");
-
-              panic::set_hook(Box::new(|info| {
-                  write_desktop_log(&format!("[RUST PANIC CRASH] {}", info));
-              }));
-
-              tauri::Builder::default()
-                  .invoke_handler(tauri::generate_handler![log_to_file])
-                  .setup(|_app| {
-                      write_desktop_log("[RUST] Tauri window setup completed successfully.");
-                      Ok(())
-                  })
-                  .on_window_event(|event| {
-                      match event.event() {
-                          tauri::WindowEvent::CloseRequested { .. } => {
-                              write_desktop_log("[RUST] WindowEvent: CloseRequested triggered!");
-                          }
-                          tauri::WindowEvent::Destroyed => {
-                              write_desktop_log("[RUST] WindowEvent: Destroyed triggered!");
-                          }
-                          _ => {}
-                      }
-                  })
-                  .run(tauri::generate_context!())
-                  .expect("error while running tauri application");
-          }
-          '@
-          [System.IO.File]::WriteAllText("$PWD/src-tauri/src/main.rs", $mainRs, $utf8NoBom)
 
       - name: Build EXE
         run: tauri build
