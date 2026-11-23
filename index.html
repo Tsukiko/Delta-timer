@@ -377,7 +377,12 @@
     }
 
     function getNowBJ() {
-      return new Date(Date.now() + timeOffsetMs);
+      // 北京时间 = UTC+8：先把本机时间换算成 UTC，再加 8 小时，
+      // 这样无论电脑在哪个时区，getHours() 等取到的都是北京时间。
+      // timeOffsetMs 是授时得到的服务器时间与本机时钟的偏差。
+      const now = new Date();
+      const utcMs = Date.now() + timeOffsetMs + now.getTimezoneOffset() * 60000;
+      return new Date(utcMs + 8 * 3600000);
     }
 
     function pad(n, len = 2) {
@@ -390,8 +395,9 @@
       if (type === 'min') {
         next.setMinutes(now.getMinutes() + 1, 0, 0);
       } else {
+        // 半点：当前秒数 <30 定到本分钟 :30，否则定到下一分钟 :30
         if (now.getSeconds() < 30) next.setSeconds(30, 0);
-        else next.setMinutes(now.getMinutes() + 1, 0, 0);
+        else { next.setMinutes(now.getMinutes() + 1); next.setSeconds(30, 0); }
       }
       targetTimestamp = next.getTime();
       document.getElementById('targetInput').value =
